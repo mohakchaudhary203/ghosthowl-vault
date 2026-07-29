@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ghosthowl-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ghosthowl
+      POSTGRES_PASSWORD: ghosthowl_dev_password
+      POSTGRES_DB: ghosthowl_vault
+    ports:
+      - "5432:5432"
+    volumes:
+      - ghosthowl_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ghosthowl"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: ghosthowl-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://ghosthowl:ghosthowl_dev_password@postgres:5432/ghosthowl_vault"
+      JWT_SECRET: "change_me_in_production_please"
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  ghosthowl_pgdata:

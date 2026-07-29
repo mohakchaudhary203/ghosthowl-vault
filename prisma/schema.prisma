@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String   // for login auth only - NEVER derives the encryption key
+  kdfSalt       String   // salt used client-side to derive the vault encryption key
+  createdAt     DateTime @default(now())
+  secrets       Secret[]
+  teamMembers   TeamMember[]
+}
+
+model Team {
+  id        String       @id @default(cuid())
+  name      String
+  createdAt DateTime     @default(now())
+  members   TeamMember[]
+  secrets   Secret[]
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  userId   String
+  teamId   String
+  role     String   @default("member") // owner | admin | member
+  user     User     @relation(fields: [userId], references: [id])
+  team     Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+// The server only ever stores ciphertext. `iv` and `ciphertext` are
+// base64-encoded outputs of client-side AES-256-GCM encryption.
+// The server has no way to decrypt this data - that is the
+// zero-knowledge guarantee.
+model Secret {
+  id         String   @id @default(cuid())
+  name       String
+  ciphertext String   @db.Text
+  iv         String
+  authTag    String
+  ownerId    String
+  teamId     String?
+  owner      User     @relation(fields: [ownerId], references: [id])
+  team       Team?    @relation(fields: [teamId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

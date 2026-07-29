@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0b0d10;
+  color: #e6e8eb;
+}
+
+.card {
+  background-color: #14171c;
+  border: 1px solid #22262e;
+  border-radius: 0.75rem;
+}
+
+.btn-primary {
+  background-color: #7c5cff;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.9; }
+
+.input-field {
+  background-color: #0b0d10;
+  border: 1px solid #22262e;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: #e6e8eb;
+  width: 100%;
+}
